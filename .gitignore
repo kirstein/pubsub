@@ -1,0 +1,5 @@
+pubsub.sublime-project
+pubsub.sublime-workspace
+node_modules
+cov/
+src-cov/
