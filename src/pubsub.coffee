@@ -1,7 +1,13 @@
-# # Wrap the function
-# do (global = this) ->
-#   "use strict"
+###
+  @author Mikk Kirstein http://www.github.com/kirstein
 
+  An implementation of Publish/Subscribe pattern.
+  Contains following methods:
+    1. #subscribe(event, callback, [context])
+    2. #unsubscribe([event], [callback])
+    3. #publish(event, [args...])
+    4. #once(event, callback, [context])
+###
 class PubSub
 
   constructor: ->
@@ -12,8 +18,8 @@ class PubSub
   # Mandatory parameters are event and callback
   # If context is defined then it will proxy the callback through that context
   subscribe   : (event, callback, context) ->
-    throw new Error "No callback defined" if typeof callback isnt 'function'
     throw new Error "No event defined"    if typeof event    is   'undefined'
+    throw new Error "No callback defined" if typeof callback isnt 'function'
 
     # Stored callback object
     callb = callback : callback
@@ -21,6 +27,8 @@ class PubSub
 
     @_pubsub[event] or= []
     @_pubsub[event].push callb
+
+    return @
 
   # Unsubscribes callback from PubSub
   # If no arguments are given will clear the state of pubsub
@@ -37,9 +45,13 @@ class PubSub
     for i in [callbacks.length-1...-1]
       # Get the callback
       callb = callbacks[i].callback
-
+      # Check if we are dealing with a wrapper
+      # If thats the case lets extract the original callback out of it
+      if callb._original then callb = callb._original
       # If the callback is the same, remove it
       callbacks.splice i, 1 if callb is callback
+
+    return @
 
 
   # Publish the event
@@ -56,6 +68,35 @@ class PubSub
       # If its a object extract wrapped callback from it
       callback = callb.callback
       callback.apply callb.context, args
+
+    return @
+
+  # Subscribe to event
+  # Only one event callback will be triggered to that event
+  # After the first callback is triggered the callback will be removed from callbacks list
+  once : (event, callback, context) ->
+    throw new Error "No event defined"    if typeof event    is   'undefined'
+    throw new Error "No callback defined" if typeof callback isnt 'function'
+
+    # Wrap the callback into closure.
+    # New function will remove the wrapper from list if its called
+    wrapped = ->
+      # Delete the reference to original callback
+      # and unsubscribe the wrapper function
+      delete wrapped._original
+      @unsubscribe event, wrapped
+      # Trigger the actual callback
+      callback.apply context, arguments
+
+    # Attach the original callback to wrapper
+    # Needed for unsubscribing
+    wrapped._original = callback
+
+    # Subscribe the wrapped function
+    # Make sure that the context is the same as we are in
+    return @subscribe event, wrapped, @
+
+
 
   # Create links for easier access
   # Link subscribe to on

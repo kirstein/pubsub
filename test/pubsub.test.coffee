@@ -132,6 +132,15 @@ describe "PubSub", ->
       pubsub.subscribe event, callb
       pubsub.publish event, 'test'
 
+    it "should publish events without arguments", (done) ->
+      pubsub = new PubSub()
+      event  = "random..event"
+      callb  = ->
+        done()
+
+      pubsub.subscribe event, callb
+      pubsub.publish event
+
     it "should publish between multiple receivers", (done) ->
       pubsub = new PubSub()
       event  = "this.is.sparta"
@@ -151,3 +160,62 @@ describe "PubSub", ->
 
       pubsub.publish event, 'sparta'
 
+  describe "#once", ->
+    it "should throw when no event is defined", ->
+      pubsub = new PubSub()
+      (-> pubsub.once undefined).should.throw "No event defined"
+
+    it "should throw when no callback is defined", ->
+      pubsub = new PubSub()
+      (-> pubsub.once 'event', undefined).should.throw "No callback defined"
+
+    it "should register callback just once for that event", (done) ->
+      pubsub = new PubSub()
+      event  = 'once.event'
+      calls  = 0
+      fn = (test) ->
+        test.should.be.equal 'test'
+        calls += 1
+        throw new Error "callback called multiple times" if calls isnt 1
+
+      pubsub.once event, fn
+      pubsub.publish event, 'test'
+      pubsub.publish event, 'test'
+
+      setTimeout (
+        ->
+        assert calls is 1
+        done()
+      ), 10
+
+    it "should be able to remove callback", ->
+      pubsub = new PubSub()
+      event  = 'once.event'
+      calls  = 0
+      fn = ->
+
+      pubsub.once event, fn
+      pubsub.unsubscribe event, fn
+
+      pubsub._pubsub[event].should.be.instanceOf(Array)
+                           .and.be.empty
+
+  describe "API must be chainable", ->
+    it "publish should be chainable", ->
+      pubsub = new PubSub()
+      pubsub.publish('test', ->).should.equal pubsub
+
+
+    it "unsubscribe should be chainable", ->
+      pubsub = new PubSub()
+      pubsub.unsubscribe('test', ->).should.equal pubsub
+
+
+    it "trigger should be chainable", ->
+      pubsub = new PubSub()
+      pubsub.trigger('test', ->).should.equal pubsub
+
+
+    it "once should be chainable", ->
+      pubsub = new PubSub()
+      pubsub.once('test', ->).should.equal pubsub
