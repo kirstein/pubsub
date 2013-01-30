@@ -8,12 +8,6 @@ class PubSub
     # Data for the current pubsub
     @_pubsub = {}
 
-  # Proxy callback, will make sure that the context stays the same
-  _callback   : (callback, context = @) ->
-    # Save the object, keep the original callback
-    return  wrapped  : (-> callback.apply context, arguments)
-           ,original : callback
-
   # Subscribes to event
   # Mandatory parameters are event and callback
   # If context is defined then it will proxy the callback through that context
@@ -21,11 +15,12 @@ class PubSub
     throw new Error "No callback defined" if typeof callback isnt 'function'
     throw new Error "No event defined"    if typeof event    is   'undefined'
 
-    # Proxy the callback if context is set
-    callback = @_callback callback, context if typeof context isnt 'undefined'
+    # Stored callback object
+    callb = callback : callback
+            ,context : context or @
 
     @_pubsub[event] or= []
-    @_pubsub[event].push callback
+    @_pubsub[event].push callb
 
   # Unsubscribes callback from PubSub
   # If no arguments are given will clear the state of pubsub
@@ -40,11 +35,8 @@ class PubSub
     # Reverse loop through callbacks list
     callbacks = @_pubsub[event] or []
     for i in [callbacks.length-1...-1]
-      callb = callbacks[i]
-
-      # If the callback is an object
-      # extract the original callback out of it
-      callb = callb.original if typeof callb is 'object'
+      # Get the callback
+      callb = callbacks[i].callback
 
       # If the callback is the same, remove it
       callbacks.splice i, 1 if callb is callback
@@ -58,12 +50,12 @@ class PubSub
 
     # Loop through all callbacks and trigger with arguments
     callbacks = @_pubsub[event] or []
-    for callback in callbacks
+    for callb in callbacks
 
       # Check if callback is an object
       # If its a object extract wrapped callback from it
-      callback = callback.wrapped if typeof callback is 'object'
-      callback.apply @, args
+      callback = callb.callback
+      callback.apply callb.context, args
 
   # Create links for easier access
   # Link subscribe to on

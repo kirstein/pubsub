@@ -3,3 +3,5 @@ pubsub.sublime-workspace
 node_modules
 cov/
 src-cov/
+test/pubsub.test.js
+src/pubsub.js

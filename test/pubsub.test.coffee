@@ -58,7 +58,8 @@ describe "PubSub", ->
       pubsub.unsubscribe event, callbacks.two
 
       pubsub._pubsub[event].should.be.instanceOf(Array).with.lengthOf(2)
-      pubsub._pubsub[event].should.include(callbacks.one, callbacks.six)
+      callb = pubsub._pubsub[event].map (obj) -> return obj.callback
+      callb.should.include(callbacks.one, callbacks.six)
 
     it "should remove object with context change from list", ->
       pubsub = new PubSub()
@@ -73,7 +74,8 @@ describe "PubSub", ->
       pubsub.unsubscribe event, callbacks.two
 
       pubsub._pubsub[event].should.be.instanceOf(Array).with.lengthOf(2)
-      pubsub._pubsub[event].should.include(callbacks.one, callbacks.six)
+      callb = pubsub._pubsub[event].map (obj) -> return obj.callback
+      callb.should.include(callbacks.one, callbacks.six)
 
   describe "#subscribe", ->
     it "should link #on to #subscribe", ->
@@ -95,7 +97,7 @@ describe "PubSub", ->
 
       pubsub._pubsub[event].should.be.instanceOf(Array)
                            .with.lengthOf(1)
-      pubsub._pubsub[event][0].should.equal(callb)
+      pubsub._pubsub[event][0].callback.should.equal(callb)
 
     it "should subscribe to pubsub with context", (done) ->
       pubsub = new PubSub()
