@@ -24,8 +24,15 @@ compile = (from = '.', to = '.', callback) ->
 build = (callback) ->
   exec "coffee -c -o . ./src", (err, stdout, stderr) ->
     throw error if err
-    console.log "Built and minified"
+    console.log "PubSub Built"
     callback?()
 
 minimize = ->
-  exec "uglifyjs pubsub.js -o pubsub.min.js"
+  pack    = require "./package.json"
+  version = pack.version
+  dev     = "pubsub.js"
+  min     = "pubsub.#{version}.min.js"
+  exec "uglifyjs #{dev} -o #{min}", (err, stdout, stderr) ->
+    throw err if err
+    exec "mv #{dev} pubsub.#{version}.js"
+    console.log "PubSub minified"

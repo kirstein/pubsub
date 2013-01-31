@@ -1,6 +1,6 @@
 {
   "name": "pubsub.js",
-  "version": "0.0.1",
+  "version": "1.0.0-BETA",
   "author": "Mikk Kirstein <mikk@kolmas.org>",
   "description": "Simple pubsub for front and backend development",
   "license": "MIT",
@@ -16,8 +16,6 @@
     "coffee-coverage": "0.0.6",
     "should": "~1.2.1",
     "assert": "~0.4.9",
-  },
-  "dependencies": {
     "coffee-script": "~1.4.0"
   }
 }
