@@ -116,3 +116,7 @@ if typeof define is 'function' and typeof define.amd is 'object' and define.amd
 # in Node.js or RingoJS v0.8.0+
 else if typeof module is 'object' and module and module.exports
   module.exports = PubSub
+
+# Add it to global
+else
+  @.PubSub = PubSub

@@ -108,6 +108,8 @@
     });
   } else if (typeof module === 'object' && module && module.exports) {
     module.exports = PubSub;
+  } else {
+    this.PubSub = PubSub;
   }
 
 }).call(this);
