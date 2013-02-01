@@ -10,6 +10,7 @@
 
 (function() {
   var PubSub,
+    __hasProp = {}.hasOwnProperty,
     __slice = [].slice;
 
   PubSub = (function() {
@@ -29,7 +30,7 @@
 
     PubSub.prototype.subscribe = function(event, callback, context) {
       var callb, _base;
-      if (typeof event === 'undefined') {
+      if (!(event != null)) {
         throw new Error("No event defined");
       }
       if (typeof callback !== 'function') {
@@ -49,6 +50,7 @@
         Unsubscribes callback from PubSub
         If no arguments are given will clear the state of pubsub (remove all events and their listeners).
         If no callback is defined then it will clear all the callbacks for that event.
+        If no event is defined and callback is then it will search through all events and remove the given callback
     
         @param {String}   event    Name of the event
         @param {Function} callback Function to be removed
@@ -56,19 +58,28 @@
 
 
     PubSub.prototype.unsubscribe = function(event, callback) {
-      var callb, callbacks, i, _i, _ref;
-      if (typeof event === 'undefined' && typeof callback === 'undefined') {
+      var callb, callbacks, i, key, val, _i, _ref, _ref1;
+      if (!(event != null) && !(callback != null)) {
         delete this._pubsub;
         return this;
       }
-      if (!this._pubsub || !this._pubsub[event]) {
+      if (!this._pubsub) {
         return this;
       }
-      if (typeof callback === 'undefined') {
+      if (!(callback != null)) {
         delete this._pubsub[event];
       }
+      if (!(event != null) && callback) {
+        _ref = this._pubsub;
+        for (key in _ref) {
+          if (!__hasProp.call(_ref, key)) continue;
+          val = _ref[key];
+          this.unsubscribe(key, callback);
+        }
+        return this;
+      }
       callbacks = this._pubsub[event] || [];
-      for (i = _i = _ref = callbacks.length - 1; _ref <= -1 ? _i < -1 : _i > -1; i = _ref <= -1 ? ++_i : --_i) {
+      for (i = _i = _ref1 = callbacks.length - 1; _ref1 <= -1 ? _i < -1 : _i > -1; i = _ref1 <= -1 ? ++_i : --_i) {
         callb = callbacks[i].callback;
         if (callb._original) {
           callb = callb._original;

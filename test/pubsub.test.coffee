@@ -28,6 +28,45 @@ describe "PubSub", ->
 
       assert typeof pubsub._pubsub is 'undefined'
 
+    it "should remove all registered functions when no event is defined", ->
+      pubsub = new PubSub()
+      fn     = ->
+
+      pubsub.subscribe 'one', fn
+      pubsub.subscribe 'two', fn
+
+      pubsub.unsubscribe null, fn
+
+      pubsub._pubsub['one'].should.be.instanceOf(Array).be.empty
+      pubsub._pubsub['two'].should.be.instanceOf(Array).be.empty
+
+    it "should remove all registered functions when no event is defined and context is", ->
+      pubsub = new PubSub()
+      fn     = ->
+
+      pubsub.subscribe 'one', fn, @
+      pubsub.subscribe 'two', fn, @
+
+      pubsub.unsubscribe null, fn
+
+      pubsub._pubsub['one'].should.be.instanceOf(Array).be.empty
+      pubsub._pubsub['two'].should.be.instanceOf(Array).be.empty
+
+    it "should only remove registered callbacks when no event is defined", ->
+      pubsub = new PubSub()
+      fn     = ->
+      fn2    = ->
+
+      pubsub.subscribe 'one', fn, @
+      pubsub.subscribe 'two', fn2, @
+
+      pubsub.unsubscribe null, fn
+
+      pubsub._pubsub['one'].should.be.instanceOf(Array).be.empty
+      pubsub._pubsub['two'].should.be.instanceOf(Array)
+                           .with.lengthOf(1)
+      pubsub._pubsub['two'][0].callback.should.equal fn2
+
 
     it "should remove all callbacks with given event from list if no callback is given", ->
       pubsub = new PubSub()

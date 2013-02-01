@@ -18,7 +18,7 @@ class PubSub
     @param {Object|Function} context  Context that event will be triggered through when calling
   ###
   subscribe   : (event, callback, context) ->
-    throw new Error "No event defined"    if typeof event    is   'undefined'
+    throw new Error "No event defined"    if not event?
     throw new Error "No callback defined" if typeof callback isnt 'function'
 
     # Setup a pubsub if its not initiated yet
@@ -37,23 +37,31 @@ class PubSub
     Unsubscribes callback from PubSub
     If no arguments are given will clear the state of pubsub (remove all events and their listeners).
     If no callback is defined then it will clear all the callbacks for that event.
+    If no event is defined and callback is then it will search through all events and remove the given callback
 
     @param {String}   event    Name of the event
     @param {Function} callback Function to be removed
   ###
   unsubscribe : (event, callback) ->
     # Clear the state if both event and callback is undefined
-    if typeof event is 'undefined' and typeof callback is 'undefined'
+    if not event? and not callback?
       delete @_pubsub
       return @
 
-    # Return if no pubsub is defined or no given event is in pubsub
-    if not @_pubsub or not @_pubsub[event]
+    # Return if no events have been registered
+    if not @_pubsub
       return @
 
     # Delete all callbacks of that event IF no callback is defined
     # Deletes references to those callbacks
-    delete @_pubsub[event] if typeof callback is 'undefined'
+    delete @_pubsub[event] if not callback?
+
+    # If the event is not defined and the callback is
+    # then remove events recursively
+    if not event? and callback
+      # Trigger recursively loop
+      @unsubscribe key, callback for own key, val of @_pubsub
+      return @
 
     # Reverse loop through callbacks list
     callbacks = @_pubsub[event] or []
@@ -130,11 +138,11 @@ class PubSub
     return @subscribe event, wrapped
 
   # Create links for easier access
-  # Link subscribe to on
+  # Link subscribe -> on
   on       : @::subscribe
-  # Link unsubscribe to off
+  # Link unsubscribe -> off
   off      : @::unsubscribe
-  # Link trigger to publish
+  # Link trigger -> publish
   trigger  : @::publish
 
 # Expose pubsub
