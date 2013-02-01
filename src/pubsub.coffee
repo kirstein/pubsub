@@ -2,24 +2,27 @@
   @author Mikk Kirstein http://www.github.com/kirstein
 
   An implementation of Publish/Subscribe pattern.
-  Contains following methods:
-    1. #subscribe(event, callback, [context])
-    2. #unsubscribe([event], [callback])
-    3. #publish(event, [args...])
-    4. #once(event, callback, [context])
+  Simple pubsub that can be used to spice up your application.
 ###
 class PubSub
 
   constructor: ->
-    # Data for the current pubsub
-    @_pubsub = {}
 
-  # Subscribes to event
-  # Mandatory parameters are event and callback
-  # If context is defined then it will proxy the callback through that context
+  ###
+    Subscribes a callback to a event.
+    Callback will be called when the event is triggered using the #trigger method.
+    When context is no defined the context will be set for this.
+
+    @param {String}          event    Name of the event that callback will be registered to listen
+    @param {Function}        callback Function that will be triggered on given event
+    @param {Object|Function} context  Context that event will be triggered through when calling
+  ###
   subscribe   : (event, callback, context) ->
     throw new Error "No event defined"    if typeof event    is   'undefined'
     throw new Error "No callback defined" if typeof callback isnt 'function'
+
+    # Setup a pubsub if its not initiated yet
+    @_pubsub or= {}
 
     # Stored callback object
     callb = callback : callback
@@ -30,35 +33,60 @@ class PubSub
 
     return @
 
-  # Unsubscribes callback from PubSub
-  # If no arguments are given will clear the state of pubsub
-  # If no callback is defined then it will clear all the callbacks for that event
+  ###
+    Unsubscribes callback from PubSub
+    If no arguments are given will clear the state of pubsub (remove all events and their listeners).
+    If no callback is defined then it will clear all the callbacks for that event.
+
+    @param {String}   event    Name of the event
+    @param {Function} callback Function to be removed
+  ###
   unsubscribe : (event, callback) ->
     # Clear the state if both event and callback is undefined
-    @_pubsub = {} if typeof event is 'undefined' and typeof callback is 'undefined'
+    if typeof event is 'undefined' and typeof callback is 'undefined'
+      delete @_pubsub
+      return @
+
+    # Return if no pubsub is defined or no given event is in pubsub
+    if not @_pubsub or not @_pubsub[event]
+      return @
 
     # Delete all callbacks of that event IF no callback is defined
+    # Deletes references to those callbacks
     delete @_pubsub[event] if typeof callback is 'undefined'
 
     # Reverse loop through callbacks list
     callbacks = @_pubsub[event] or []
     for i in [callbacks.length-1...-1]
+
       # Get the callback
       callb = callbacks[i].callback
+
       # Check if we are dealing with a wrapper
       # If thats the case lets extract the original callback out of it
       if callb._original then callb = callb._original
+
       # If the callback is the same, remove it
       callbacks.splice i, 1 if callb is callback
 
     return @
 
+  ###
+    Publishes the event to all its listeners.
+    Event will be published to all callbacks that have subscribed.
+    All arguments shall be passed on to callback.
 
-  # Publish the event
-  # Event will be published to all callbacks that have subscribed.
-  # All arguments shall be passed
+    Triggered callbacks will be referenced to either the context that was given
+    when subscribing the event or this (pubsub)
+
+    @param {String} event     Event to be triggered
+    @param {*}      arguments Arguments to be passed to function on calling
+  ###
   publish : (event, args...) ->
     throw new Error "No event defined" if typeof event is 'undefined'
+
+    # No pubsub is defined
+    return @ if not @_pubsub
 
     # Loop through all callbacks and trigger with arguments
     callbacks = @_pubsub[event] or []
@@ -71,9 +99,14 @@ class PubSub
 
     return @
 
-  # Subscribe to event
-  # Only one event callback will be triggered to that event
-  # After the first callback is triggered the callback will be removed from callbacks list
+  ###
+    Subscribe to event only for one callback.
+    After the first callback is triggered the callback will be removed from callbacks list.
+
+    @param {String}          event    Name of the event that callback will be registered to listen
+    @param {Function}        callback Function that will be triggered on given event
+    @param {Object|Function} context  Context that event will be triggered through when calling
+  ###
   once : (event, callback, context) ->
     throw new Error "No event defined"    if typeof event    is   'undefined'
     throw new Error "No callback defined" if typeof callback isnt 'function'
@@ -85,6 +118,7 @@ class PubSub
       # and unsubscribe the wrapper function
       delete wrapped._original
       @unsubscribe event, wrapped
+
       # Trigger the actual callback
       callback.apply context, arguments
 
@@ -93,10 +127,7 @@ class PubSub
     wrapped._original = callback
 
     # Subscribe the wrapped function
-    # Make sure that the context is the same as we are in
-    return @subscribe event, wrapped, @
-
-
+    return @subscribe event, wrapped
 
   # Create links for easier access
   # Link subscribe to on

@@ -26,8 +26,7 @@ describe "PubSub", ->
 
       pubsub.unsubscribe()
 
-      assert typeof pubsub._pubsub[event] is 'undefined'
-      assert typeof pubsub._pubsub[event2] is 'undefined'
+      assert typeof pubsub._pubsub is 'undefined'
 
 
     it "should remove all callbacks with given event from list if no callback is given", ->
