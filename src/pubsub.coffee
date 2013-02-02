@@ -59,8 +59,11 @@ class PubSub
     # If the event is not defined and the callback is
     # then remove events recursively
     if not event? and callback
-      # Trigger recursively loop
-      @unsubscribe key, callback for own key, val of @_pubsub
+      # Trigger recursively loop if the event is defined
+      # This should always be true
+      for own key, val of @_pubsub
+        @unsubscribe key, callback if key?
+
       return @
 
     # Reverse loop through callbacks list

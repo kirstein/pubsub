@@ -74,7 +74,9 @@
         for (key in _ref) {
           if (!__hasProp.call(_ref, key)) continue;
           val = _ref[key];
-          this.unsubscribe(key, callback);
+          if (key != null) {
+            this.unsubscribe(key, callback);
+          }
         }
         return this;
       }
