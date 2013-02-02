@@ -6,8 +6,6 @@
 ###
 class PubSub
 
-  constructor: ->
-
   ###
     Subscribes a callback to a event.
     Callback will be called when the event is triggered using the #trigger method.
