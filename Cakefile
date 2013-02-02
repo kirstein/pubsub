@@ -31,8 +31,8 @@ minimize = ->
   pack    = require "./package.json"
   version = pack.version
   dev     = "pubsub.js"
-  min     = "pubsub.#{version}.min.js"
+  min     = "pubsub-#{version}.min.js"
   exec "uglifyjs #{dev} -o #{min}", (err, stdout, stderr) ->
     throw err if err
-    exec "mv #{dev} pubsub.#{version}.js"
+    exec "mv #{dev} pubsub-#{version}.js"
     console.log "PubSub minified"
