@@ -61,8 +61,7 @@ class PubSub
     if not event? and callback
       # Trigger recursively loop if the event is defined
       # This should always be true
-      for own key, val of @_pubsub
-        @unsubscribe key, callback if key?
+      @unsubscribe key, callback for own key, val of @_pubsub when key?
 
       return @
 
