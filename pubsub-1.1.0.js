@@ -109,7 +109,7 @@
     PubSub.prototype.publish = function() {
       var args, callb, callback, callbacks, event, _i, _len;
       event = arguments[0], args = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
-      if (typeof event === 'undefined') {
+      if (!(event != null)) {
         throw new Error("No event defined");
       }
       if (!this._pubsub) {
@@ -136,7 +136,7 @@
 
     PubSub.prototype.once = function(event, callback, context) {
       var wrapped;
-      if (typeof event === 'undefined') {
+      if (!(event != null)) {
         throw new Error("No event defined");
       }
       if (typeof callback !== 'function') {

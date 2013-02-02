@@ -94,7 +94,7 @@ class PubSub
     @param {*}      arguments Arguments to be passed to function on calling
   ###
   publish : (event, args...) ->
-    throw new Error "No event defined" if typeof event is 'undefined'
+    throw new Error "No event defined" if not event?
 
     # No pubsub is defined
     return @ if not @_pubsub
@@ -119,7 +119,7 @@ class PubSub
     @param {Object|Function} context  Context that event will be triggered through when calling
   ###
   once : (event, callback, context) ->
-    throw new Error "No event defined"    if typeof event    is   'undefined'
+    throw new Error "No event defined"    if not event?
     throw new Error "No callback defined" if typeof callback isnt 'function'
 
     # Wrap the callback into closure.
