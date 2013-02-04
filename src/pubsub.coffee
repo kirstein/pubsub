@@ -79,12 +79,12 @@ class PubSub
       callb = callb._original or callb
 
       # Remove the callback from list if:
-      #   callback === callback
+      #   !context and callback == callback
       #   !callback and (context === context)
       #   callback  and  context === context
-      if (callb is callback) or
-         (callback?     and cntxt is context and callb is callback) or
-         (not callback? and cntxt is context)
+      if (callback? and context? and cntxt is context and callb is callback) or
+         (not context?           and callb is callback) or
+         (not callback?          and cntxt is context)
           callbacks.splice i, 1
 
     return @

@@ -88,7 +88,7 @@
         callb = callbacks[i].callback;
         cntxt = callbacks[i].context;
         callb = callb._original || callb;
-        if ((callb === callback) || ((callback != null) && cntxt === context && callb === callback) || (!(callback != null) && cntxt === context)) {
+        if (((callback != null) && (context != null) && cntxt === context && callb === callback) || (!(context != null) && callb === callback) || (!(callback != null) && cntxt === context)) {
           callbacks.splice(i, 1);
         }
       }

@@ -1,6 +1,6 @@
 {
   "name": "pubsub.js",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "author": "Mikk Kirstein <mikk@kolmas.org>",
   "description": "Simple pubsub for front and backend development",
   "license": "MIT",
