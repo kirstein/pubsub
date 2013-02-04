@@ -35,47 +35,57 @@ class PubSub
     Unsubscribes callback from PubSub
     If no arguments are given will clear the state of pubsub (remove all events and their listeners).
     If no callback is defined then it will clear all the callbacks for that event.
-    If no event is defined and callback is then it will search through all events and remove the given callback
+    If no event is defined and callback OR context is then
+       it will search through all events and remove the given callback that matches the callback or context
 
     @param {String}   event    Name of the event
     @param {Function} callback Function to be removed
+    @param {Object|Function} context context to be removed
   ###
-  unsubscribe : (event, callback) ->
-    # Clear the state if both event and callback is undefined
-    if not event? and not callback?
-      delete @_pubsub
-      return @
-
+  unsubscribe : (event, callback, context) ->
     # Return if no events have been registered
     if not @_pubsub
       return @
 
-    # Delete all callbacks of that event IF no callback is defined
-    # Deletes references to those callbacks
-    delete @_pubsub[event] if not callback?
+    if not event?
+      # Clear the state if both event and callback is undefined
+      if not callback? and not context?
+        delete @_pubsub
+        return @
 
-    # If the event is not defined and the callback is
-    # then remove events recursively
-    if not event? and callback
-      # Trigger recursively loop if the event is defined
-      # This should always be true
-      @unsubscribe key, callback for own key, val of @_pubsub when key?
+      # If the event is not defined and either callback or context is
+      # Then recursive loop all events and search for the callbacks to remove
+      else
+        @unsubscribe key, callback, context for own key, val of @_pubsub when key?
+        return @
 
+    # If the event is defined and callback and context are not
+    # Then remove the event and return
+    else if not callback? and not context?
+      delete @_pubsub[event]
       return @
 
     # Reverse loop through callbacks list
+    # Looping in reverse because then we can remove necessary events on the fly
     callbacks = @_pubsub[event] or []
     for i in [callbacks.length-1...-1]
 
       # Get the callback
       callb = callbacks[i].callback
+      cntxt = callbacks[i].context
 
       # Check if we are dealing with a wrapper
       # If thats the case lets extract the original callback out of it
-      if callb._original then callb = callb._original
+      callb = callb._original or callb
 
-      # If the callback is the same, remove it
-      callbacks.splice i, 1 if callb is callback
+      # Remove the callback from list if:
+      #   callback === callback
+      #   !callback and (context === context)
+      #   callback  and  context === context
+      if (callb is callback) or
+         (callback?     and cntxt is context and callb is callback) or
+         (not callback? and cntxt is context)
+          callbacks.splice i, 1
 
     return @
 

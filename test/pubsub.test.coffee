@@ -115,6 +115,59 @@ describe "PubSub", ->
       callb = pubsub._pubsub[event].map (obj) -> return obj.callback
       callb.should.include(callbacks.one, callbacks.six)
 
+    it "should remove all events with certain context [1]", ->
+      pubsub = new PubSub()
+      fn1    = ->
+      fn2    = ->
+      event  = 'hei:kitty'
+
+      context = test : 'test'
+      pubsub.subscribe event, fn1, context
+      pubsub.subscribe event, fn2
+
+      pubsub._pubsub[event].should.be.instanceOf(Array).with.lengthOf(2)
+
+      pubsub.unsubscribe null, null, context
+      pubsub._pubsub[event].should.be.instanceOf(Array).with.lengthOf(1)
+      callb = pubsub._pubsub[event].map (obj) -> return obj.callback
+      callb.should.include(fn2)
+
+    it "should remove all events with certain context AND callback [2]", ->
+      pubsub = new PubSub()
+      fn1    = ->
+      fn2    = ->
+      event  = 'hei:kitty'
+
+      context = test : 'test'
+      pubsub.subscribe event, fn1, context
+      pubsub.subscribe event, fn1, context
+      pubsub.subscribe event, fn2
+
+      pubsub._pubsub[event].should.be.instanceOf(Array).with.lengthOf(3)
+
+      pubsub.unsubscribe null, fn1, context
+      pubsub._pubsub[event].should.be.instanceOf(Array).with.lengthOf(1)
+      callb = pubsub._pubsub[event].map (obj) -> return obj.callback
+      callb.should.include(fn2)
+
+     it "should remove all events with certain event AND context [3]", ->
+      pubsub = new PubSub()
+      fn1    = ->
+      fn2    = ->
+      event  = 'hei:kitty'
+
+      context = test : 'test'
+      pubsub.subscribe event, fn1, context
+      pubsub.subscribe event, fn1, context
+      pubsub.subscribe event, fn2
+
+      pubsub._pubsub[event].should.be.instanceOf(Array).with.lengthOf(3)
+
+      pubsub.unsubscribe event, null, context
+      pubsub._pubsub[event].should.be.instanceOf(Array).with.lengthOf(1)
+      callb = pubsub._pubsub[event].map (obj) -> return obj.callback
+      callb.should.include(fn2)
+
   describe "#subscribe", ->
     it "should link #on to #subscribe", ->
       PubSub::on.should.be.equal PubSub::subscribe

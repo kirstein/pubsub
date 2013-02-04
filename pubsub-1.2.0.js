@@ -50,43 +50,45 @@
         Unsubscribes callback from PubSub
         If no arguments are given will clear the state of pubsub (remove all events and their listeners).
         If no callback is defined then it will clear all the callbacks for that event.
-        If no event is defined and callback is then it will search through all events and remove the given callback
+        If no event is defined and callback OR context is then
+           it will search through all events and remove the given callback that matches the callback or context
     
         @param {String}   event    Name of the event
         @param {Function} callback Function to be removed
+        @param {Object|Function} context context to be removed
     */
 
 
-    PubSub.prototype.unsubscribe = function(event, callback) {
-      var callb, callbacks, i, key, val, _i, _ref, _ref1;
-      if (!(event != null) && !(callback != null)) {
-        delete this._pubsub;
-        return this;
-      }
+    PubSub.prototype.unsubscribe = function(event, callback, context) {
+      var callb, callbacks, cntxt, i, key, val, _i, _ref, _ref1;
       if (!this._pubsub) {
         return this;
       }
-      if (!(callback != null)) {
-        delete this._pubsub[event];
-      }
-      if (!(event != null) && callback) {
-        _ref = this._pubsub;
-        for (key in _ref) {
-          if (!__hasProp.call(_ref, key)) continue;
-          val = _ref[key];
-          if (key != null) {
-            this.unsubscribe(key, callback);
+      if (!(event != null)) {
+        if (!(callback != null) && !(context != null)) {
+          delete this._pubsub;
+          return this;
+        } else {
+          _ref = this._pubsub;
+          for (key in _ref) {
+            if (!__hasProp.call(_ref, key)) continue;
+            val = _ref[key];
+            if (key != null) {
+              this.unsubscribe(key, callback, context);
+            }
           }
+          return this;
         }
+      } else if (!(callback != null) && !(context != null)) {
+        delete this._pubsub[event];
         return this;
       }
       callbacks = this._pubsub[event] || [];
       for (i = _i = _ref1 = callbacks.length - 1; _ref1 <= -1 ? _i < -1 : _i > -1; i = _ref1 <= -1 ? ++_i : --_i) {
         callb = callbacks[i].callback;
-        if (callb._original) {
-          callb = callb._original;
-        }
-        if (callb === callback) {
+        cntxt = callbacks[i].context;
+        callb = callb._original || callb;
+        if ((callb === callback) || ((callback != null) && cntxt === context && callb === callback) || (!(callback != null) && cntxt === context)) {
           callbacks.splice(i, 1);
         }
       }
