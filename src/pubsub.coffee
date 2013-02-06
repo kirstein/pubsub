@@ -107,8 +107,10 @@ class PubSub
     return @ if not @_pubsub
 
     # Loop through all callbacks and trigger with arguments
+    # Using reverse loop in case some event gets unsubscribed at the same time
     callbacks = @_pubsub[event] or []
-    for callb in callbacks
+    for i in [callbacks.length-1...-1]
+      callb = callbacks[i]
 
       # Check if callback is an object
       # If its a object extract wrapped callback from it

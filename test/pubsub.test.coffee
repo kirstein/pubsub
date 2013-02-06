@@ -300,7 +300,6 @@ describe "PubSub", ->
     it "should be able to remove callback", ->
       pubsub = new PubSub()
       event  = 'once.event'
-      calls  = 0
       fn = ->
 
       pubsub.once event, fn
@@ -308,6 +307,21 @@ describe "PubSub", ->
 
       pubsub._pubsub[event].should.be.instanceOf(Array)
                            .and.be.empty
+
+    it "should be able to register multiple same once events", (done) ->
+      pubsub = new PubSub()
+      event  = 'test'
+      calls  = 0
+      fn = ->
+        calls += 1
+        done() if calls is 4
+
+      pubsub.once event, fn
+      pubsub.once event, fn
+      pubsub.once event, fn
+      pubsub.once event, fn
+
+      pubsub.trigger event
 
   describe "API must be chainable", ->
     it "publish should be chainable", ->

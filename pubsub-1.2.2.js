@@ -109,7 +109,7 @@
 
 
     PubSub.prototype.publish = function() {
-      var args, callb, callback, callbacks, event, _i, _len;
+      var args, callb, callback, callbacks, event, i, _i, _ref;
       event = arguments[0], args = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
       if (!(event != null)) {
         throw new Error("No event defined");
@@ -118,8 +118,8 @@
         return this;
       }
       callbacks = this._pubsub[event] || [];
-      for (_i = 0, _len = callbacks.length; _i < _len; _i++) {
-        callb = callbacks[_i];
+      for (i = _i = _ref = callbacks.length - 1; _ref <= -1 ? _i < -1 : _i > -1; i = _ref <= -1 ? ++_i : --_i) {
+        callb = callbacks[i];
         callback = callb.callback;
         callback.apply(callb.context, args);
       }
