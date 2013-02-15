@@ -39,17 +39,20 @@ Usage:
 > For easier access the method `unsubscribe` can be called also with name `off`
 
 Unsubscribes (remove) a previously subscribed event or callback from pubsub.  
-Has four (4) different use cases:  
+Has six (__6__) different use cases:  
 
 1. If __no__ event AND callback __is__ given then it will unsubscribe (remove) given callback from all registered events.  
 2. If __no__ event AND __no__ callback is given then it will clear unsubscribe all subscribed callbacks (clear the pubsub)  
 3. If event __is__ given AND callback __is__ given then it will just remove the given callback from callbacks list for that event.  
 4. If event __is__ given AND __no__ callback is given then it will unsubscribe all callbacks that are linked to that event name.
+5. If event OR/AND callback AND context __is__ given then it will remove only the callbacks that match all three.
+6. If only context is defined then it will remove all callbacks with the given context.
 
 Parameters (required parameters in __bold__, optional parameters in _italic_):
 
   1. _event_    {String} Name of the event to be removed.
   2. _callback_ {Function} Callback to be removed.
+  3. _context_  {Function|Object} Context to be removed.
 
 Usage:
 
